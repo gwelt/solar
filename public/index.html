@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang=de>
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+<!--
+	<link rel="icon" type="image/png" href="logo.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#505050">
+	<meta name="Description" content="SOLAR">
+-->
+	<title>SOLAR</title>
+	<script>
+		var r=new Object();
+		const max_age=15000;
+		const fixedURL=undefined;		
+
+		function get(file,json_request,callback) {callAPI('GET',(fixedURL||window.location.href.replace(/[^/]*$/,''))+file,json_request,(r)=>{callback(r)})}
+		function callAPI(method,URI,reqobj,callback) {
+			if (!(URI).startsWith('http')) {log('fetching '+URI+' aborted');callback();return true;}
+			var t=stopwatch();
+			var req = new XMLHttpRequest();
+			req.onreadystatechange = function() {if (this.readyState == 4) {
+				log(method+' '+URI+': '+stopwatch(t)+'ms'); 
+				if (this.status<500) {callback(this.responseText)} else {callback()}}
+			};
+			req.open(method,URI,true);
+			req.setRequestHeader("Content-Type","application/json;charset=UTF-8");
+			req.send(reqobj);
+		}
+		function stopwatch(time) {if (typeof time != 'undefined') {return new Date()-time} else {return new Date()}}
+		function log(l) {console.log(l)};
+
+		function update(force) {
+			if (force==true) {get('solar/update',{},(e)=>{log(e);analyse(e)});} else {
+				get('solar/get',{},(e)=>{log(e); analyse(e); let r=JSON.parse(e); if (r.current.age>max_age) {update(true)}});
+			}
+		}
+		function analyse(e) {
+			r=JSON.parse(e);
+			document.getElementById('header').innerHTML='Produktion: '+parseInt(r.current.dc_power).toFixed(2)+'W';
+			document.getElementById('json').innerHTML=e;
+		}
+
+	</script>
+	<style>
+		* {box-sizing: border-box;}
+		html, body, section, div, input, textarea, select, button {border-radius: 0.3rem;font-family: Verdana, Geneva, sans-serif; font-size: 1rem; width:100%; overflow-wrap:break-word;}
+		html, body {height:100%;}
+		body {border:0; padding:0%; margin:0; background-color:#fbfbfb; color: #000;}
+
+		.bigscreen {height:100%;padding:0rem 1rem 1rem 1rem; border-radius:0; margin:0; background-repeat:no-repeat;background-size:0%;background-position:center top; nobackground-image:url('bghead.svg') }
+		.screen {min-width:300px; max-width:420px; margin:auto; text-align:left;}
+		#footer_image {position:fixed; bottom:0; z-index:1; display:none;}
+		.data {font-size: 0.5rem; padding-top: 1rem}
+
+		@media only screen and (max-width: 320px) {
+			.bigscreen {padding:0rem 0.6rem 1rem 0.6rem;}
+			.screen {min-width:260px;}
+			html, body, section, div, input, textarea, select, button {font-size: 1rem}
+		}
+		@media only screen and (min-width: 768px) {
+			.screen {min-width:640px; max-width:640px; margin:auto;}
+			html, body, section, div, input, textarea, select, button {font-size: 1.5rem}
+		}
+		@media print {
+			.screen {max-width:100%; margin:auto;}
+			body {background-color:#FFFFFF;}
+		}
+
+		#header {padding:0.5rem 0 1rem 0;}
+
+	</style>
+</head>
+<body onload='update()' onresize=''>
+	<div id=bigscreen class=bigscreen>
+		<div id=screen class=screen>
+			<div id=header>Produktion: ...</div>
+			<button onclick='update()'>update</button>
+			<div id=json class=data>data ...</div>
+		</div>
+		<div id=image_footer_height_space></div>
+	</div>
+</body>
+</html>

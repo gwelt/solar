@@ -1,0 +1,17 @@
+{
+  "port":                     3000,
+
+  "hostname":                 "api.solarmanpv.com",
+  "path_token":               "/account/v1.0/token",
+  "path_device_currentData":  "/device/v1.0/currentData",
+  "path_device_historical":   "/device/v1.0/historical",
+  "path_station_realTime":    "/station/v1.0/realTime",
+  "path_weather":             "/region-s/weather/searchForecast?regionNationId=60&regionLevel1=886&regionLevel2=14528&lan=de",
+
+  "email":                    "youremail@yourmaildomain.com",
+  "password_SHA256":          "64_byte_hex_string",
+  "deviceSn":                 "1234567890-1",
+  "stationId":                1234567,
+  "appId":                    "123456789012345",
+  "appSecret":                "32_byte_hex_string"
+}
