@@ -95,7 +95,8 @@ Solarman.prototype.update_device_currentData = function (callback) {
 }
 
 Solarman.prototype.update_device_historical_dayframe = function (callback,offset) {
-	// get data of last 24 hours
+	// get data for a given day (default=today)
+	// merge received data into device_historical_dayframe-array and delete all data older than 24 hours
 	let d=new Date();
 	if (offset!==undefined) {d=new Date(d.getTime()+offset)} // offset = -86400000 for yesterday
 	let request_day=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
