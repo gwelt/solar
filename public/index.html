@@ -33,7 +33,7 @@
 
 		function update(force) {
 			if (force==true) {get('update',{},(e)=>{log(e);analyse(e)});} else {
-				get('get',{},(e)=>{log(e); analyse(e); let r=JSON.parse(e); if (r.current.age>max_age) {update(true)}});
+				get('get',{},(e)=>{log(e); analyse(e); let r=JSON.parse(e); if ((r.current.age==undefined)||(r.current.age>max_age)) {update(true)}});
 			}
 		}
 		function analyse(e) {

@@ -20,19 +20,18 @@ const https = require('https');
 
 function Solarman(config) {
 	this.config=config;
-	this.bearer_token=undefined;
-	this.bearer_token='eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiIwX25ldHp3ZXJnQGdtYWlsLmNvbV8yIiwic2NvcGUiOlsiYWxsIl0sImRldGFpbCI6eyJvcmdhbml6YXRpb25JZCI6MCwidG9wR3JvdXBJZCI6bnVsbCwiZ3JvdXBJZCI6bnVsbCwicm9sZUlkIjotMSwidXNlcklkIjo5MTg3ODgsInZlcnNpb24iOjEsImlkZW50aWZpZXIiOiJuZXR6d2VyZ0BnbWFpbC5jb20iLCJpZGVudGl0eVR5cGUiOjIsImFwcElkIjoiMjAyMjA3Mjc4MDI1MzI4In0sImV4cCI6MTY2Nzc2NjAyMiwiYXV0aG9yaXRpZXMiOlsiYWxsIl0sImp0aSI6IjIzNGI5Njk2LWE4OTQtNGQ5NS1iNTc0LTkwOTQ1NzAzM2E2MCIsImNsaWVudF9pZCI6InRlc3QifQ.l6LKFDaOt41FU1qzx4BJLXKpSal7zJyKBT0BngJA4UJhdOrtyY51rnwtxIcFeDobjs8zkpQlEQpy3COoVgqFFxjpLkvqOeKUrLfEnZigttW0WHa2L2BVlxVuwODdX-y_r4I669DmOidaXDNdOMU496AVYv0E3SgwH9FjL9P5MMg7muUdzaaOtkc9aqn_VGgqx5dmhzwLK3eEVRbzlkD3BqP9I60JfrSSDF1cosryAZXLg4N9cVzkB0_NyxMo8fLTeepZ-4WVoTW4jaVoHNy9vWnx9LiQeSKAYYpkzXQNcFsm-ns4itSA6HULeZJKRUiPVl8jaVW2p1K4AtWB7F8L3w';
-	if (!this.bearer_token) {this.update_bearer_token()}
+	this.update_bearer_token(this.config.bearer_token_for_testing);
 	this.device_currentData=new Object();
 	this.device_historical_dayframe=[];
-	this.update_device_currentData(()=>{});
-	this.update_device_historical_dayframe(()=>{});
-	this.update_device_historical_dayframe(()=>{},-86400000);
+	this.update(()=>{});
 	return this;
 }
 
-Solarman.prototype.update_bearer_token = function () {
+Solarman.prototype.update_bearer_token = function (bearer_token_for_testing) {
+	if (bearer_token_for_testing!==undefined) {this.bearer_token=bearer_token_for_testing; console.log('using bearer_token_for_testing'); return;} else {console.log('getting new bearer token')}
 	this.bearer_token=undefined;
+	this.device_currentData=new Object();
+	this.device_historical_dayframe=[];
 	this.request(
 		'POST',
 		this.config.path_token+'?appId='+this.config.appId,
@@ -42,8 +41,7 @@ Solarman.prototype.update_bearer_token = function () {
 			let o=JSON_parse(r);
 			if (o.success==true) {
 				this.bearer_token=o.access_token;
-				this.device_currentData.message=undefined;
-				this.device_currentData.info=undefined;
+				this.update(()=>{});
 			} else {
 				// if request failed
 				this.device_currentData.message='AUTHENTICATION FAILED.';
@@ -54,13 +52,13 @@ Solarman.prototype.update_bearer_token = function () {
 }
 
 Solarman.prototype.get = function (callback) {
-	this.device_currentData.age=stopwatch(this.device_currentData.lastupdate);
+	if (this.device_currentData.lastupdate) {this.device_currentData.age=stopwatch(this.device_currentData.lastupdate)}
 	callback(JSON.stringify({'current':this.device_currentData,'history':this.device_historical_dayframe}));
 }
 
 Solarman.prototype.update = function (callback) {
-	this.device_currentData.age=stopwatch(this.device_currentData.lastupdate);
-	if (this.device_currentData.age>(this.config.max_age||15000)) {
+	if (this.device_currentData.lastupdate) {this.device_currentData.age=stopwatch(this.device_currentData.lastupdate)} else {this.update_device_historical_dayframe(()=>{},-86400000)}
+	if ((this.device_currentData.age==undefined)||(this.device_currentData.age>(this.config.max_age||15000))) {
 		let c = new Promise((resolve)=>{this.update_device_currentData((r)=>{resolve(r)})});
 		let h = new Promise((resolve)=>{this.update_device_historical_dayframe((r)=>{resolve(r)})});
 		Promise.all([c,h]).then((values_of_all_promises_array)=>{this.get(callback)});
@@ -142,11 +140,11 @@ Solarman.prototype.request = function (method,path,headers,body,callback) {
 	o.method=method||'GET';
 	o.path=path||'';
 	o.headers=headers||undefined;
-	//console.log(o);
+	console.log(o);
 	let req = https.request(o, res => {
 		let r=''; //if (is_binary) {res.setEncoding('binary')};
 		res.on('data', d => {r+=d})
-		res.on('end', function () {callback(r)}) // console.log(r);
+		res.on('end', function () {console.log(r);callback(r)}) // console.log(r);
 	})
 	req.on('error', error => {console.error('==ERROR== ',error)})
 	req.write(body);
