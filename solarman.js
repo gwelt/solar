@@ -20,18 +20,23 @@ const https = require('https');
 
 function Solarman(config) {
 	this.config=config;
-	this.update_bearer_token(this.config.bearer_token_for_testing);
 	this.device_currentData=new Object();
 	this.device_historical_dayframe=[];
-	this.update(()=>{});
+	this.update_bearer_token(this.config.bearer_token_for_testing);
+	//this.update(()=>{});
 	return this;
 }
 
 Solarman.prototype.update_bearer_token = function (bearer_token_for_testing) {
-	if (bearer_token_for_testing!==undefined) {this.bearer_token=bearer_token_for_testing; console.log('using bearer_token_for_testing'); return;} else {console.log('getting new bearer token')}
 	this.bearer_token=undefined;
 	this.device_currentData=new Object();
 	this.device_historical_dayframe=[];
+	if (bearer_token_for_testing!==undefined) {
+		console.log('using bearer_token_for_testing');
+		this.bearer_token=bearer_token_for_testing;
+		this.update(()=>{});
+		return;
+	}
 	this.request(
 		'POST',
 		this.config.path_token+'?appId='+this.config.appId,
@@ -57,7 +62,9 @@ Solarman.prototype.get = function (callback) {
 }
 
 Solarman.prototype.update = function (callback) {
-	if (this.device_currentData.lastupdate) {this.device_currentData.age=stopwatch(this.device_currentData.lastupdate)} else {this.update_device_historical_dayframe(()=>{},-86400000)}
+	if (this.device_currentData.lastupdate) {this.device_currentData.age=stopwatch(this.device_currentData.lastupdate)} else {
+		this.update_device_historical_dayframe(()=>{},-86400000);
+	}
 	if ((this.device_currentData.age==undefined)||(this.device_currentData.age>(this.config.max_age||15000))) {
 		let c = new Promise((resolve)=>{this.update_device_currentData((r)=>{resolve(r)})});
 		let h = new Promise((resolve)=>{this.update_device_historical_dayframe((r)=>{resolve(r)})});
@@ -140,11 +147,11 @@ Solarman.prototype.request = function (method,path,headers,body,callback) {
 	o.method=method||'GET';
 	o.path=path||'';
 	o.headers=headers||undefined;
-	console.log(o);
+	//console.log(o);
 	let req = https.request(o, res => {
 		let r=''; //if (is_binary) {res.setEncoding('binary')};
 		res.on('data', d => {r+=d})
-		res.on('end', function () {console.log(r);callback(r)}) // console.log(r);
+		res.on('end', function () {callback(r)}) // console.log(r);
 	})
 	req.on('error', error => {console.error('==ERROR== ',error)})
 	req.write(body);
