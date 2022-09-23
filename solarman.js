@@ -34,6 +34,8 @@ Solarman.prototype.update_bearer_token = function (bearer_token_for_testing) {
 	if (bearer_token_for_testing!==undefined) {
 		console.log('using bearer_token_for_testing');
 		this.bearer_token=bearer_token_for_testing;
+		this.config.bearer_token_for_testing=undefined;
+		this.update_device_historical_dayframe(()=>{},-86400000);
 		this.update(()=>{});
 		return;
 	}
@@ -46,6 +48,7 @@ Solarman.prototype.update_bearer_token = function (bearer_token_for_testing) {
 			let o=JSON_parse(r);
 			if (o.success==true) {
 				this.bearer_token=o.access_token;
+				this.update_device_historical_dayframe(()=>{},-86400000);
 				this.update(()=>{});
 			} else {
 				// if request failed
@@ -57,15 +60,22 @@ Solarman.prototype.update_bearer_token = function (bearer_token_for_testing) {
 }
 
 Solarman.prototype.get = function (callback) {
-	if (this.device_currentData.lastupdate) {this.device_currentData.age=stopwatch(this.device_currentData.lastupdate)}
+	let now=Math.round(Date.now()/1000);
+	let lastupdate=now;
+	if (this.device_historical_dayframe[this.device_historical_dayframe.length-1]!==undefined) {lastupdate=this.device_historical_dayframe[this.device_historical_dayframe.length-1][0]};
+	let seconds_until_next_expected_update=lastupdate+420-now;
+	if (seconds_until_next_expected_update<0) {
+		let delay=(this.device_currentData.state==1?60:1800);
+		seconds_until_next_expected_update=delay+(seconds_until_next_expected_update%delay);
+	}
+	this.device_currentData.seconds_until_next_expected_update=seconds_until_next_expected_update;
+	this.device_currentData.age=stopwatch(this.device_currentData.last_serverrequest);
 	callback(JSON.stringify({'current':this.device_currentData,'history':this.device_historical_dayframe}));
 }
 
 Solarman.prototype.update = function (callback) {
-	if (this.device_currentData.lastupdate) {this.device_currentData.age=stopwatch(this.device_currentData.lastupdate)} else {
-		this.update_device_historical_dayframe(()=>{},-86400000);
-	}
-	if ((this.device_currentData.age==undefined)||(this.device_currentData.age>(this.config.max_age||15000))) {
+	this.device_currentData.age=stopwatch(this.device_currentData.last_serverrequest);
+	if (this.device_currentData.age>15000) {
 		let c = new Promise((resolve)=>{this.update_device_currentData((r)=>{resolve(r)})});
 		let h = new Promise((resolve)=>{this.update_device_historical_dayframe((r)=>{resolve(r)})});
 		Promise.all([c,h]).then((values_of_all_promises_array)=>{this.get(callback)});
@@ -87,7 +97,7 @@ Solarman.prototype.update_device_currentData = function (callback) {
 				this.device_currentData.dc_power=get_value_by_key(o.dataList,'DPi_t1');
 				this.device_currentData.production_today=get_value_by_key(o.dataList,'Etdy_ge1');
 				this.device_currentData.production_total=get_value_by_key(o.dataList,'Et_ge0');
-				this.device_currentData.lastupdate=stopwatch();
+				this.device_currentData.last_serverrequest=stopwatch();
 			} else {
 				// if request failed
 				this.device_currentData.message='NO DATA AVAILABLE. TRY AGAIN LATER.';
@@ -138,7 +148,7 @@ Solarman.prototype.update_device_historical_dayframe = function (callback,offset
 
 function JSON_parse(json) {let o=new Object(); try {o=JSON.parse(json)} catch (error) {o.data=json;o.error=error;} return o;} // returns object in any case, empty object if parsing fails
 function get_value_by_key(list,key) {if (list&&list.length) {let f=list.find(e=>e.key==key); return f?f.value:undefined;} else {return undefined}}
-function stopwatch(startdate) {if (typeof startdate != 'undefined') {return new Date()-startdate} else {return new Date()}}
+function stopwatch(startdate) {if (typeof startdate != 'undefined') {return new Date()-startdate} else {return new Date().getTime()}}
 
 Solarman.prototype.request = function (method,path,headers,body,callback) {
 	let o = new Object();

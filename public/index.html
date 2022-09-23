@@ -109,14 +109,15 @@
 			document.getElementById('json').innerHTML=e+'<br><br>';
 
 			clearInterval(interval);
-			let multiply=4; // wait for 4*max_age_sec seconds after unsuccessful update (default: 1 minute)
-			if (r.current.state!==1) {multiply=4*30} // if offline, wait for 30 minutes until next request
+			//let multiply=4; // wait for 4*max_age_sec seconds after unsuccessful update (default: 1 minute)
+			//if (r.current.state!==1) {multiply=4*30} // if offline, wait for 30 minutes until next request
 			interval=setInterval((e)=>{
-				let s=update_interval_sec-(Math.round(new Date().getTime()/1000)-r.history[r.history.length-1][0]);
-				let update_s=s;
-				if (s<=0) {update_s=max_age_sec*multiply-(Math.abs(s)%(max_age_sec*multiply))-1}
-				if ((s==0)||(update_s==0)) {update()}
-				e.innerHTML='auto-update in '+Math.floor(update_s/60)+':'+(update_s%60).toString().padStart(2,'0')+'';
+				//let s=update_interval_sec-(Math.round(new Date().getTime()/1000)-r.history[r.history.length-1][0]);
+				//let update_s=s;
+				//if (s<=0) {update_s=max_age_sec*multiply-(Math.abs(s)%(max_age_sec*multiply))-1}
+				//if ((s==0)||(update_s==0)) {update()}
+				let update_s=r.current.seconds_until_next_expected_update--;
+				if (update_s<=0) {update()} else {e.innerHTML='auto-update in '+Math.floor(update_s/60)+':'+(update_s%60).toString().padStart(2,'0')};
 			},1000,document.getElementById('next_update'));
 
 		}
