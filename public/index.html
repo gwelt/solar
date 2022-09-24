@@ -5,42 +5,75 @@
 	<title>SOLAR</title>
 	<script>
 		var r=new Object();
-		var global_max_y=0;
 		var interval=undefined;
-		const max_age=15000;
-		const max_age_sec=Math.round(max_age/1000);
-		const update_interval_sec=420;
-		const fixedURL=undefined;
+		const dataURL=undefined;
 
 		const sunny = "M4.069 13h-4.069v-2h4.069c-.041.328-.069.661-.069 1s.028.672.069 1zm3.034-7.312l-2.881-2.881-1.414 1.414 2.881 2.881c.411-.529.885-1.003 1.414-1.414zm11.209 1.414l2.881-2.881-1.414-1.414-2.881 2.881c.528.411 1.002.886 1.414 1.414zm-6.312-3.102c.339 0 .672.028 1 .069v-4.069h-2v4.069c.328-.041.661-.069 1-.069zm0 16c-.339 0-.672-.028-1-.069v4.069h2v-4.069c-.328.041-.661.069-1 .069zm7.931-9c.041.328.069.661.069 1s-.028.672-.069 1h4.069v-2h-4.069zm-3.033 7.312l2.88 2.88 1.415-1.414-2.88-2.88c-.412.528-.886 1.002-1.415 1.414zm-11.21-1.415l-2.88 2.88 1.414 1.414 2.88-2.88c-.528-.411-1.003-.885-1.414-1.414zm2.312-4.897c0 2.206 1.794 4 4 4s4-1.794 4-4-1.794-4-4-4-4 1.794-4 4zm10 0c0 3.314-2.686 6-6 6s-6-2.686-6-6 2.686-6 6-6 6 2.686 6 6z";
 		const partly_sunny = "M2.396 12h-2.396v-2h2.396v2zm7.604-6.458v-3.542h-2v3.542h2zm-4.793.876l-2.156-2.156-1.414 1.414 2.156 2.156 1.414-1.414zm9.461-2.396l-2.115 2.114 1.414 1.414 2.115-2.114-1.414-1.414zm-11.7 10.907l-2.198 1.919 1.303 1.517 2.198-1.919-1.303-1.517zm21.032 2.793c0 2.362-1.95 4.278-4.354 4.278h-10.292c-2.404 0-4.354-1.916-4.354-4.278 0-.77.211-1.49.574-2.113-.964-.907-1.574-2.18-1.574-3.609 0-2.762 2.238-5 5-5 1.329 0 2.523.528 3.414 1.376.649-.24 1.35-.376 2.086-.376 3.171 0 5.753 2.443 5.921 5.516 2.034.359 3.579 2.105 3.579 4.206zm-18-5.722c0 .86.37 1.628.955 2.172.485-.316 1.029-.551 1.624-.656.088-1.61.843-3.042 1.994-4.046-.46-.288-.991-.47-1.573-.47-1.654 0-3 1.346-3 3zm16 5.722c0-2.076-1.979-2.618-3.489-2.512.218-1.439-.24-5.21-4.011-5.21-3.875 0-4.062 3.854-4.011 5.209-1.385-.084-3.489.395-3.489 2.513 0 1.256 1.056 2.278 2.354 2.278h10.291c1.299 0 2.355-1.022 2.355-2.278z";
 		const cloudy = "M20.422 11.516c-.178-3.233-3.031-5.778-6.432-5.492-1.087-1.239-2.693-2.024-4.49-2.024-3.172 0-5.754 2.443-5.922 5.516-2.033.359-3.578 2.105-3.578 4.206 0 2.362 1.949 4.278 4.354 4.278h1.326c.771 1.198 2.124 2 3.674 2h10.291c2.406 0 4.355-1.916 4.355-4.278 0-2.101-1.545-3.847-3.578-4.206zm-15.395 4.484h-.673c-1.297 0-2.354-1.022-2.354-2.278 0-2.118 2.104-2.597 3.488-2.512-.05-1.356.137-5.21 4.012-5.21.967 0 1.714.25 2.29.644-1.823.922-3.096 2.746-3.212 4.872-2.022.358-3.697 2.127-3.551 4.484zm14.618 2h-10.291c-1.297 0-2.354-1.022-2.354-2.278 0-2.118 2.104-2.597 3.488-2.512-.05-1.356.137-5.21 4.012-5.21 3.771 0 4.229 3.771 4.012 5.209 1.509-.105 3.488.437 3.488 2.513 0 1.256-1.057 2.278-2.355 2.278z";
 		const stars = "M11 6.999c2.395.731 4.27 2.607 4.999 5.001.733-2.395 2.608-4.269 5.001-5-2.393-.731-4.268-2.605-5.001-5-.729 2.394-2.604 4.268-4.999 4.999zm7 7c1.437.438 2.562 1.564 2.999 3.001.44-1.437 1.565-2.562 3.001-3-1.436-.439-2.561-1.563-3.001-3-.437 1.436-1.562 2.561-2.999 2.999zm-6 5.501c1.198.365 2.135 1.303 2.499 2.5.366-1.198 1.304-2.135 2.501-2.5-1.197-.366-2.134-1.302-2.501-2.5-.364 1.197-1.301 2.134-2.499 2.5zm-6-8.272c.522.658 1.118 1.253 1.775 1.775-.657.522-1.252 1.117-1.773 1.774-.522-.658-1.118-1.253-1.776-1.776.658-.521 1.252-1.116 1.774-1.773zm-.001-4.228c-.875 2.873-3.128 5.125-5.999 6.001 2.876.88 5.124 3.128 6.004 6.004.875-2.874 3.128-5.124 5.996-6.004-2.868-.874-5.121-3.127-6.001-6.001z";
 
-		function draw_sun(inner_d) {
-			let svg_sun = document.getElementById('svg_sun');
-			let e=document.getElementById('svg_sun_inner');
-			if (e) {svg_sun.removeChild(e)};
-			svg_sun.appendChild(newNode('path',{id:'svg_sun_inner',d:inner_d}));
+		function update(force) {
+			if (force==true) {get('update',{},(e)=>{analyse(e)})} else {
+				get('get',{},(e)=>{analyse(e); if ((r.current.age==undefined)||(r.current.age>15000)) {update(true)}});
+			}
 		}
 
-		function draw(data){
-			let now=new Date().getTime()/1000;
+		function analyse(json) {
+			//log(json);
+			r=JSON.parse(json);
+
+			// parse history / get max_y / calculate (k)Wh
+			let Ws=0;
+			let start=0;
+			let current=0;
+			for (var i=0; i<r.history.length; i++) {
+				let now=r.history[i][0];
+				let d=now-start;
+				if (d>600) {d=0} // don't count if there is no update for a long time (10 minutes)
+				Ws+=current*d;
+				start=now;
+				current=r.history[i][2];
+				if (r.history[i][2]>(r.max_y||0)) {r.max_y=r.history[i][2]} // get max_y and write to global r to use in draw-function
+			}
+			r.current.production_today_self_calculated=Ws/1000/60/60;
+
+			// display graphics
+			draw_chart();
+			let W=parseFloat(r.history[r.history.length-1][2]);
+			draw_sun(r.current.state!==1?stars:(W>80?sunny:(W>20?partly_sunny:cloudy)));
+
+			// display text
+			document.getElementById('info').innerHTML=(r.current.state==1?W.toFixed(2)+'W':'sleeping')+'<br>';
+			// trend (up or down?)
+			let trend=(r.history[r.history.length-1][2]-r.history[0][2]);
+			document.getElementById('additional_info').innerHTML=parseFloat(r.current.production_today_self_calculated).toFixed(2)+'/'+parseFloat(r.current.production_today).toFixed(2)+'kWh ('+trend.toFixed(0)+'W) &nbsp; | &nbsp; ' +	r.max_y+'W (peak) &nbsp; | &nbsp; ' + parseFloat(r.current.production_total).toFixed(1)+'kWh<br>';
+			let last_update=new Date(r.history[r.history.length-1][0]*1000);
+			document.getElementById('last_update').innerHTML='<span style="cursor:pointer" onclick=javascript:toggle_json_display()>latest</span>: '+r.history[r.history.length-1][2]+'W | '+last_update.getHours().toString().padStart(2,'0')+':'+last_update.getMinutes().toString().padStart(2,'0')+':'+last_update.getSeconds().toString().padStart(2,'0');
+			document.getElementById('json').innerHTML=json+'<br><br>';
+
+			// set interval
+			clearInterval(interval);
+			interval=setInterval((elem)=>{
+				let update_s=r.current.seconds_until_next_expected_update--;
+				if (update_s<=0) {update()}
+				if (update_s>=0) {elem.innerHTML='auto-update in '+Math.floor(update_s/60)+':'+(update_s%60).toString().padStart(2,'0')};
+			},1000,document.getElementById('next_update'));
+
+		}
+
+		function draw_chart(){
 			let width=1440;
 			let height=400;
 			let max_x=86400;
-			let start_x=now-max_x;
-			let max_y=0;
-			for (var i=0; i<data.history.length; i++) {
-				if (data.history[i][2]>max_y) {max_y=data.history[i][2]}
-			}
-			global_max_y=max_y; // to promote global
-			let x=(data.history[0][0]-start_x)*width/max_x;
-			let y=data.history[0][2]*height/max_y;
+			let start_x=(r.current.last_serverrequest/1000)-max_x;
+			//let max_y=0; for (var i=0; i<r.history.length; i++) {if (r.history[i][2]>max_y) {max_y=r.history[i][2]}} // use r.max_y instead
+			let x=(r.history[0][0]-start_x)*width/max_x;
+			let y=r.history[0][2]*height/r.max_y;
 			let d='M '+x+' '+(height-y);
-			for (var i=0; i<data.history.length; i++) {
-				let x=(data.history[i][0]-start_x)*width/max_x;
-				let y=data.history[i][2]*height/max_y;
+			for (var i=0; i<r.history.length; i++) {
+				let x=(r.history[i][0]-start_x)*width/max_x;
+				let y=r.history[i][2]*height/r.max_y;
 				d+=' L '+x+' '+(height-y);
 			}
 			let svg = document.getElementById('svg_chart');
@@ -56,7 +89,14 @@
 		}	
 		function newNode(elem, v) {elem = document.createElementNS("http://www.w3.org/2000/svg", elem); for (var p in v) elem.setAttribute(p, v[p]); return elem;}
 
-		function get(file,json_request,callback) {callAPI('GET',(fixedURL||window.location.href.replace(/[^/]*$/,''))+file,json_request,(r)=>{callback(r)})}
+		function draw_sun(inner_d) {
+			let svg_sun = document.getElementById('svg_sun');
+			let e=document.getElementById('svg_sun_inner');
+			if (e) {svg_sun.removeChild(e)};
+			svg_sun.appendChild(newNode('path',{id:'svg_sun_inner',d:inner_d}));
+		}
+
+		function get(file,json_request,callback) {callAPI('GET',(dataURL||window.location.href.replace(/[^/]*$/,''))+file,json_request,(r)=>{callback(r)})}
 		function callAPI(method,URI,reqobj,callback) {
 			if (!(URI).startsWith('http')) {log('fetching '+URI+' aborted');callback();return true;}
 			var t=stopwatch();
@@ -71,56 +111,6 @@
 		}
 		function stopwatch(time) {if (typeof time != 'undefined') {return new Date()-time} else {return new Date()}}
 		function log(l) {console.log(l)};
-
-		function update(force) {
-			if (force==true) {get('update',{},(e)=>{analyse(e)})} else {
-				get('get',{},(e)=>{analyse(e); if ((r.current.age==undefined)||(r.current.age>max_age)) {update(true)}});
-			}
-		}
-		function analyse(e) {
-			log(e);
-			r=JSON.parse(e);
-			draw(r);
-
-			// calculate kWh
-			let Ws=0;
-			let start=0;
-			let current=0;
-			for (var i=0; i<r.history.length; i++) {
-				let now=r.history[i][0];
-				let d=now-start;
-				if (d>600) {d=0} // don't count if there is no update for a long time (10 minutes)
-				Ws+=current*d;
-				start=now;
-				current=r.history[i][2];
-			}
-			r.current.production_today_self_calculated=Ws/1000/60/60;
-
-			let W=parseFloat(r.history[r.history.length-1][2]);
-			draw_sun(r.current.state!==1?stars:(W>80?sunny:(W>20?partly_sunny:cloudy)));
-
-			document.getElementById('info').innerHTML=(r.current.state==1?W.toFixed(2)+'W':'sleeping')+'<br>';
-			document.getElementById('additional_info').innerHTML=
-				parseFloat(r.current.production_today_self_calculated).toFixed(2)+'/'+parseFloat(r.current.production_today).toFixed(2)+'kWh &nbsp; | &nbsp; ' +
-				global_max_y+'W (peak) &nbsp; | &nbsp; ' +
-				parseFloat(r.current.production_total).toFixed(1)+'kWh<br>';
-			let last_update=new Date(r.history[r.history.length-1][0]*1000);
-			document.getElementById('last_update').innerHTML='<span style="cursor:pointer" onclick=javascript:toggle_json_display()>latest</span>: '+r.history[r.history.length-1][2]+'W | '+last_update.getHours().toString().padStart(2,'0')+':'+last_update.getMinutes().toString().padStart(2,'0')+':'+last_update.getSeconds().toString().padStart(2,'0');
-			document.getElementById('json').innerHTML=e+'<br><br>';
-
-			clearInterval(interval);
-			//let multiply=4; // wait for 4*max_age_sec seconds after unsuccessful update (default: 1 minute)
-			//if (r.current.state!==1) {multiply=4*30} // if offline, wait for 30 minutes until next request
-			interval=setInterval((e)=>{
-				//let s=update_interval_sec-(Math.round(new Date().getTime()/1000)-r.history[r.history.length-1][0]);
-				//let update_s=s;
-				//if (s<=0) {update_s=max_age_sec*multiply-(Math.abs(s)%(max_age_sec*multiply))-1}
-				//if ((s==0)||(update_s==0)) {update()}
-				let update_s=r.current.seconds_until_next_expected_update--;
-				if (update_s<=0) {update()} else {e.innerHTML='auto-update in '+Math.floor(update_s/60)+':'+(update_s%60).toString().padStart(2,'0')};
-			},1000,document.getElementById('next_update'));
-
-		}
 
 		function toggle_json_display() {
 			let j=document.getElementById('json');
@@ -138,7 +128,7 @@
 		.screen {min-width:300px; max-width:420px; margin:auto; text-align:left;}
 
 		.size3 {font-size: 1.5rem; padding: 2rem 0 0 0}
-		.size2 {font-size: 0.9rem; padding: 0.5rem 0 0.5rem 0}
+		.size2 {font-size: 0.8rem; padding: 0.5rem 0 0.5rem 0}
 		.size1 {font-size: 0.5rem; padding: 0.2rem 0 0.2rem 0}
 		.centered {text-align: center;}
 		.monospace {font-family: monospace;}
@@ -162,21 +152,15 @@
 <body onload='update()' onresize=''>
 	<div id=bigscreen class=bigscreen>
 		<div id=screen class=screen>
-
 			<div id=info class='size3 centered'>offline</div>
-
 			<div class='centered'>
 				<svg xmlns="http://www.w3.org/2000/svg" width="10%" height="10%" viewBox="0 0 24 24" id="svg_sun"><path id="svg_sun_inner" d=""/></svg>
-
 				<svg version="1.1" viewBox="0 0 400 50" style="width:70%"><polyline points="20,20 20,24 380,24 380,20"></polyline><circle cx="26" cy="22" r="6" stroke-width="0"></circle><polyline points="368,16 368,28 386,22"></polyline></svg>
-
 				<svg xmlns="http://www.w3.org/2000/svg" width="10%" height="10%" viewBox="0 0 24 24"><path d="M20 7.093v-5.093h-3v2.093l3 3zm4 5.907l-12-12-12 12h3v10h18v-10h3zm-5 8h-14v-10.26l7-6.912 7 6.99v10.182zm-5-1h-4v-6h4v6z"/></svg>
 			</div>
 			<br>
 			<svg version="1.1" viewBox="0 0 1440 400" style="width:100%" id="svg_chart"></svg>
-
 			<div id=additional_info class='size2 centered'></div>
-
 			<button id=update_button onclick='update()'>update</button>
 			<div id=next_update class='size1 monospace centered'>auto-update active</div>
 			<div id=last_update class='size1 monospace centered'>&nbsp;</div>
