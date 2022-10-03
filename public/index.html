@@ -21,6 +21,7 @@
 				analyse(e);
 				document.getElementById('update_button').classList.remove('btn_update_off1');
 				if ((r.current.age==undefined)||(r.current.age>15000)) {
+					document.getElementById('next_update').innerHTML='0:00';
 					document.getElementById('update_button').classList.add('btn_update_off2');
 					get('update',{},(e)=>{
 						analyse(e);
@@ -33,7 +34,7 @@
 		function analyse(json) {
 			//log(json);
 			r=JSON.parse(json);
-
+	
 			// parse history / get max_y / calculate (k)Wh
 			let Ws=0;
 			let start=0;
@@ -54,32 +55,38 @@
 			let W=parseFloat(r.history[r.history.length-1][2]);
 			draw_sun(r.current.state!==1?stars:(W>80?sunny:(W>20?partly_sunny:cloudy)));
 
-			// display text
+			// production current
 			document.getElementById('info').innerHTML=(r.current.state==1?W.toFixed(2)+' W':'offline')+'<br>';
-			document.getElementById('box01_value').innerHTML=(r.current.state==1?W.toFixed(2)+' W':'offline')+'<br>';
+			document.getElementById('production_current').innerHTML=(r.current.state==1?W.toFixed(2)+' W':'offline')+'<br>';
+			if (W>0) {
+				document.getElementById('anim').setAttribute('dur',(r.max_y/W)+'s');
+				document.getElementById('anim').setAttribute('begin','0s');
+			}
 			
+			// peak
+			document.getElementById('peak_24h').innerHTML=r.max_y.toFixed(2)+' W';
+
 			// trend
 			let trend=(r.history[r.history.length-1][2]-r.history[0][2]);
 			if (trend>0) {trend='<div>&#10138;</div><div class=size2>+'+trend.toFixed(0)+' W</div>'} // &#8599;
 			else if (trend<0) {trend='<div>&#10136;</div><div class=size2>'+trend.toFixed(0)+' W</div>'} // &#8600;
 			else if (trend==0) {trend='<div>&#10132;</div><div class=size2>+/- 0 W</div>'}; 
-			document.getElementById('box02_change').innerHTML=trend;
+			document.getElementById('change_value').innerHTML=trend;
 
-			// 24h production / trend (up or down?)
+			// 24h production
 			let prod24h=parseFloat(r.current.production_today_self_calculated_Wh);
 			if (prod24h<1000) {prod24h=prod24h.toFixed(0)+' Wh'} else {prod24h=(prod24h/1000).toFixed(2)+' kWh'}
-			document.getElementById('box03_value').innerHTML=prod24h;//+'<br>('+parseFloat(r.current.production_today).toFixed(2)+'kWh)';
-			//document.getElementById('additional_info').innerHTML=(parseFloat(r.current.production_today_self_calculated_Wh)/1000).toFixed(2)+'/'+parseFloat(r.current.production_today).toFixed(2)+'kWh &nbsp; | &nbsp; ' +	r.max_y+'W (peak) &nbsp; | &nbsp; ' + parseFloat(r.current.production_total).toFixed(1)+'kWh<br>';
+			document.getElementById('production_24h').innerHTML=prod24h;
 			
-			// peak / production
-			document.getElementById('box04_peak').innerHTML=r.max_y+' W';
-			document.getElementById('box04_prod').innerHTML=parseFloat(r.current.production_total).toFixed(1)+' kWh<br>('+parseFloat(r.current.production_today).toFixed(2)+' kWh)';
-
 			// last update / next update
 			let last_update=new Date(r.history[r.history.length-1][0]*1000);
-			//document.getElementById('last_update_old').innerHTML='<span style="cursor:pointer" onclick=javascript:toggle_json_display()>latest</span>: '+r.history[r.history.length-1][2]+'W | '+last_update.getHours().toString().padStart(2,'0')+':'+last_update.getMinutes().toString().padStart(2,'0')+':'+last_update.getSeconds().toString().padStart(2,'0');
 			document.getElementById('last_update').innerHTML=last_update.getHours().toString().padStart(2,'0')+':'+last_update.getMinutes().toString().padStart(2,'0')+':'+last_update.getSeconds().toString().padStart(2,'0')+'<br>'+r.history[r.history.length-1][2]+' W';
-			document.getElementById('json').innerHTML=json+'<br><br>';
+
+			// production total
+			document.getElementById('production_total').innerHTML=parseFloat(r.current.production_total).toFixed(1)+' kWh<br>('+parseFloat(r.current.production_today).toFixed(2)+' kWh)';
+
+			// details
+			document.getElementById('json').innerHTML=json+'<br>';
 
 			// set interval
 			clearInterval(interval);
@@ -161,7 +168,7 @@
 		.size1 {font-size: 0.5rem}
 		.centered {text-align: center;}
 		.monospace {font-family: monospace;}
-		.btn {border:0; cursor:pointer; border-radius: 0.1rem; width:75%; font-size:0.8rem; margin:0.1rem 0 0.1rem 0; padding:0.2rem 0 0.2rem 0; background-color:#c0c0c0;}
+		.btn {transition: all 0.25s; border:0; cursor:pointer; border-radius: 0.1rem; width:75%; font-size:0.8rem; margin:0.1rem 0 0.1rem 0; padding:0.3rem 0 0.3rem 0; background-color:#c0c0c0;}
 		.btn_update_off1 {background-color:#bf4342;}
 		.btn_update_off2 {background-color:#6e8898;}
 		#json {display: none}
@@ -199,7 +206,14 @@
 			<div id=info class='size3 centered' style='position:relative;top:0.5rem;padding:1.5rem 0 0 0'>offline</div>
 			<div class='centered'>
 				<svg xmlns="http://www.w3.org/2000/svg" width="10%" height="10%" viewBox="0 0 24 24" id="svg_sun"><path id="svg_sun_inner" d=""/></svg>
-				<svg version="1.1" viewBox="0 0 400 50" style="width:70%"><polyline points="20,20 20,24 380,24 380,20"></polyline><circle cx="26" cy="22" r="6" stroke-width="0"></circle><polyline points="368,16 368,28 386,22"></polyline></svg>
+				<svg version="1.1" viewBox="0 0 400 50" style="width:70%">
+					<polyline points="20,20 20,24 380,24 380,20"></polyline>
+					<circle id="mc" cx="26" cy="22" r="6" stroke-width="0" fill="#6e8898">
+						<animate id="anim" attributename="cx" from="26" to="370" dur="600s" begin="click" repeatcount="indefinite"></animate>
+					</circle>
+					<circle id="nc" cx="26" cy="22" r="6" stroke-width="0"></circle>
+					<polyline points="368,16 368,28 386,22"></polyline>
+				</svg>
 				<svg xmlns="http://www.w3.org/2000/svg" width="10%" height="10%" viewBox="0 0 24 24"><path d="M20 7.093v-5.093h-3v2.093l3 3zm4 5.907l-12-12-12 12h3v10h18v-10h3zm-5 8h-14v-10.26l7-6.912 7 6.99v10.182zm-5-1h-4v-6h4v6z"/></svg>
 			</div>
 			<br>
@@ -207,39 +221,38 @@
 			<div id=additional_info class='size2 centered' style='padding:0 0 1rem 0;'></div>
 			
 			<div class=box_container>
-				<div id=box01 class='box2 c_brown'>
-					<div id=box01_header class='size1'>aktuelle Produktion</div>
-					<div id=box01_value class='size3'></div>
+				<div class='box2 c_brown'>
+					<div class='size1'>aktuelle Produktion</div>
+					<div id=production_current class='size3'></div>
 				</div>
-				<div id=box05 class='box2 c_brown'>
-					<div id=box04_peak_info class='size1'>24h-Maximum</div>
-					<div id=box04_peak class='size3'></div>
+				<div class='box2 c_brown'>
+					<div class='size1'>24h-Maximum</div>
+					<div id=peak_24h class='size3'></div>
 				</div>
-				<div id=box02 class='box2 c_brown'>
-					<div id=box02_info class='size1'>im Vergleich zu gestern</div>				
-					<div id=box02_change class='size3'></div>
+				<div class='box2 c_brown'>
+					<div class='size1'>im Vergleich zu gestern</div>				
+					<div id=change_value class='size3'></div>
 				</div>
-				<div id=box03 class='box2 c_brown'>
-					<div id=box03_info class='size1'>24h-Produktion</div> <!-- &#216; -->
-					<div id=box03_value class='size3'></div>
+				<div class='box2 c_brown'>
+					<div class='size1'>24h-Produktion</div> <!-- &#216; -->
+					<div id=production_24h class='size3'></div>
 				</div>
-				<div id=box07 class='box2 c_brown'>
-					<div id=box07_info class='size1'>letztes Update</div>
+				<div class='box2 c_brown'>
+					<div class='size1'>letztes Update</div>
 					<div id=last_update class='size2'></div>
 				</div>
-				<div id=box04 class='box2 c_brown'>
-					<div id=box04_prod_info class='size1'>Gesamtproduktion</div>
-					<div id=box04_prod class='size2'></div>
+				<div class='box2 c_brown'>
+					<div class='size1'>Gesamtproduktion</div>
+					<div id=production_total class='size2'></div>
 				</div>
-				<div id=box06 class='box2 c_brown'>
-					<div id=box06_info class='size1'>nächstes Update in</div>
+				<div class='box2 c_brown'>
+					<div class='size1'>nächstes Update in</div>
 					<div id=next_update class='size3'>--:--</div>
 				</div>
-				<div id=box08 class='box2 c_brown'>
-					<!--<div id=box08_info class='size1'>Status</div>-->
-					<div id=status class='size2'>
-						<button id=details_button class='btn' onclick='toggle_json_display()'>Details ein/aus</button>
+				<div class='box2 c_brown'>
+					<div class='size2'>
 						<button id=update_button class='btn' onclick='update()'>aktualisieren</button>
+						<button id=details_button class='btn' onclick='toggle_json_display()'>Details ein/aus</button>
 					</div>
 				</div>
 			</div>
