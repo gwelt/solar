@@ -35,13 +35,14 @@
 			//json='[]';
 			log(json);
 			r=JSON.parse(json);
-			if (r.history==undefined) {r.history=[[0,'x',0.001]]}
+			if (r.history==undefined || r.history.length==0) {r.history=[[0,'x',0.001]]}
 			if (r.current==undefined) {r.current={"state":3,"dc_power":"0","production_today":"0","production_total":"0","last_serverrequest":0,"seconds_until_next_expected_update":60,"age":0}};
 
 			// parse history / get max_y / calculate (k)Wh
 			let Ws=0;
 			let start=0;
 			let current=0;
+			r.max_y=0;
 			for (var i=0; i<r.history.length; i++) {
 				let now=r.history[i][0];
 				let d=now-start;
@@ -71,7 +72,8 @@
 			}
 			
 			// peak
-			document.getElementById('peak_24h').innerHTML=r.max_y.toFixed(2)+' W';
+			//document.getElementById('peak_24h').innerHTML=r.max_y.toFixed(2)+' W';
+			document.getElementById('peak_24h').innerHTML=r.max_y+' W';
 
 			// trend
 			let trend=(r.history[r.history.length-1][2]-r.history[0][2]);
