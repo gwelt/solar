@@ -119,6 +119,7 @@
 			for (var i=0; i<r.history.length; i++) {
 				let x=(r.history[i][0]-start_x)*width/max_x;
 				let y=r.history[i][2]*height/r.max_y;
+				if ((i>0) && ((r.history[i][0]-r.history[i-1][0])>1200)) {d+=' L '+(r.history[i-1][0]+600-start_x)*width/max_x+' '+height;} // ground line if there was no update for a long time (20 minutes)
 				d+=' L '+x+' '+(height-y);
 			}
 			let svg = document.getElementById('svg_chart');
@@ -218,8 +219,8 @@
 				<svg version="1.1" viewBox="0 0 400 50" style="width:70%">
 					<polyline points="20,20 20,24 380,24 380,20"></polyline>
 					<circle id="mc" cx="24" cy="22" r="6" stroke-width="0" fill="#000000"> <!--6e8898-->
-						<animate id="anim" attributename="cx" from="24" to="370" dur="10s" repeatcount="indefinite"/>
-    					<animateMotion id="animM" path="M 0 0 V -1 V 1 Z" dur="1s" repeatCount="indefinite"/>
+						<animate id="anim" attributename="cx" from="24" to="370" dur="99999999s" repeatcount="indefinite"/>
+    					<animateMotion id="animM" path="M 0 0 V -1 V 1 Z" dur="99999999s" repeatCount="indefinite"/>
   					</circle>
 					<circle id="nc" cx="24" cy="22" r="6" stroke-width="0"></circle>
 					<polyline points="368,16 368,28 386,22"></polyline>
@@ -227,7 +228,7 @@
 				<svg xmlns="http://www.w3.org/2000/svg" width="10%" height="10%" viewBox="0 0 24 24"><path d="M20 7.093v-5.093h-3v2.093l3 3zm4 5.907l-12-12-12 12h3v10h18v-10h3zm-5 8h-14v-10.26l7-6.912 7 6.99v10.182zm-5-1h-4v-6h4v6z"/></svg>
 			</div>
 			<br>
-			<svg version="1.1" viewBox="0 0 1440 400" style="width:100%" id="svg_chart"></svg>
+			<svg version="1.1" viewBox="0 0 1440 420" style="width:100%" id="svg_chart"></svg>
 			<div id=additional_info class='size2 centered' style='padding:0 0 1rem 0;'></div>
 			
 			<div class=box_container>
