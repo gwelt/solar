@@ -94,7 +94,7 @@ Solarman.prototype.update_device_currentData = function (callback) {
 			if (o.success==true) {
 				// parse data
 				this.device_currentData.state=o.deviceState;
-				this.device_currentData.dc_power=get_value_by_key(o.dataList,'DPi_t1');
+				this.device_currentData.dc_power=get_value_by_key(o.dataList,'DP1'); //DPi_t1
 				this.device_currentData.production_today=get_value_by_key(o.dataList,'Etdy_ge1');
 				this.device_currentData.production_total=get_value_by_key(o.dataList,'Et_ge0');
 				this.device_currentData.last_serverrequest=stopwatch();
@@ -127,12 +127,13 @@ Solarman.prototype.update_device_historical_dayframe = function (callback,offset
 				// parse data
 				o.paramDataList.map((e)=>{
 					let d=new Date(e.collectTime*1000);
-					return [parseInt(e.collectTime),d.getDate().toString().padStart(2,'0')+'|'+d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'),parseFloat(get_value_by_key(e.dataList,'DPi_t1'))];
+					return [parseInt(e.collectTime),d.getDate().toString().padStart(2,'0')+'|'+d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'),parseFloat(get_value_by_key(e.dataList,'DP1'))]; //DPi_t1
 				})
 				// Parse data. For each dataset:
 				.forEach((e)=>{
 					// if we do not find same timestamp in existing data, then save
-					if (!this.device_historical_dayframe.some((f)=>{return f[0]==e[0]})) {this.device_historical_dayframe.push(e)}
+					console.log(e[2]);
+					if ( (!this.device_historical_dayframe.some((f)=>{return f[0]==e[0]})) && (!isNaN(e[2])) ) {this.device_historical_dayframe.push(e)}
 				})
 				// housekeeping: delete datasets older than 24 hours
 				let remove_older_than_this=Math.round(Date.now()/1000)-86400;
@@ -157,11 +158,11 @@ Solarman.prototype.request = function (method,path,headers,body,callback) {
 	o.method=method||'GET';
 	o.path=path||'';
 	o.headers=headers||undefined;
-	//console.log(o);
+	console.log('REQUEST: '+JSON.stringify(o)); // DEBUG
 	let req = https.request(o, res => {
 		let r=''; //if (is_binary) {res.setEncoding('binary')};
 		res.on('data', d => {r+=d})
-		res.on('end', function () {callback(r)}) // console.log(r);
+		res.on('end', function () {callback(r);console.log('RESULT: '+r)}) // console.log(r); // DEBUG
 	})
 	req.on('error', error => {console.error('==ERROR== ',error)})
 	req.write(body);
